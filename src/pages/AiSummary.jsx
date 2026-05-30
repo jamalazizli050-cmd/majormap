@@ -1,5 +1,5 @@
 import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, Cell, PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import Button from "../components/Button";
@@ -10,11 +10,12 @@ import { getStudentProfile } from "../utils/storage";
 
 function AiSummary() {
   const { id } = useParams();
-  const university = universities.find((item) => item.id === id);
-  const profile = getStudentProfile();
-  const { program } = university ? getBestProgramForMajor(university, profile) : { program: null };
-  const cacheKey = getAiSummaryCacheKey(university, program, profile);
-  const cachedReport = cacheKey ? readCachedAiReport(cacheKey) : null;
+  const [profile] = useState(() => getStudentProfile());
+  const university = useMemo(() => universities.find((item) => item.id === id), [id]);
+  const { program } = useMemo(() => (university ? getBestProgramForMajor(university, profile) : { program: null }), [profile, university]);
+  const cacheKey = useMemo(() => getAiSummaryCacheKey(university, program, profile), [profile, program, university]);
+  const cachedReport = useMemo(() => (cacheKey ? readCachedAiReport(cacheKey) : null), [cacheKey]);
+  const requestStartedRef = useRef(Boolean(cachedReport));
   const [state, setState] = useState(() => ({
     loading: Boolean(profile && !cachedReport && university && program),
     error: "",
@@ -30,7 +31,8 @@ function AiSummary() {
   const summarySections = useMemo(() => splitAiSummary(state.summary), [state.summary]);
 
   useEffect(() => {
-    if (!profile || !university || !program || state.summary || state.error) return;
+    if (!profile || !university || !program || state.summary || state.error || requestStartedRef.current) return;
+    requestStartedRef.current = true;
     let cancelled = false;
 
     async function loadSummary() {
