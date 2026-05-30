@@ -32,23 +32,6 @@ export function regionMatches(profileOrRegion, university) {
   return !regions.length || regions.includes("All regions") || regions.includes(university.region);
 }
 
-export function categoryMatches(preference, university) {
-  if (!preference || preference === "Mixed" || preference === "Balanced") return true;
-  if (preference === "Ambitious") return university.category === "high";
-  if (preference === "Safer / backup") return ["safer", "mid"].includes(university.category);
-  return true;
-}
-
-function categoryWeight(preference, category) {
-  const maps = {
-    Ambitious: { high: 0, mid: 1, safer: 2 },
-    Balanced: { mid: 0, high: 1, safer: 2 },
-    "Safer / backup": { safer: 0, mid: 1, high: 2 },
-    Mixed: { high: 0, mid: 1, safer: 2 },
-  };
-  return maps[preference]?.[category] ?? 1;
-}
-
 function achievementScore(profile) {
   const text = normalizeText(profile?.achievements);
   let score = 0;
@@ -69,6 +52,30 @@ function examScore(profile, university) {
   if (["United Kingdom", "United States"].includes(university.region) && exams.includes("AP")) score += 8;
   if (exams.includes("IB") || exams.includes("A-levels")) score += 8;
   return score;
+}
+
+function profileEvidenceScore(profile) {
+  if (!profile) return 0;
+  const scores = profile.examScores || {};
+  const completedExams = profile.completedExams || [];
+  let score = 0;
+
+  if (normalizeText(profile.grades)) score += 14;
+  if (normalizeText(profile.qualification)) score += 8;
+  if (normalizeText(profile.achievements)) score += Math.min(18, achievementScore(profile));
+  if (completedExams.length) score += Math.min(18, completedExams.length * 5);
+  if (Object.values(scores).some((value) => normalizeText(value))) score += 10;
+  if (completedExams.some((exam) => ["AP", "IB", "A-levels", "SAT", "ACT"].includes(exam))) score += 10;
+  if (completedExams.some((exam) => ["IELTS", "TOEFL", "Duolingo"].includes(exam))) score += 8;
+
+  return score;
+}
+
+function categoryPenaltyFromProfile(profile, category) {
+  const evidence = profileEvidenceScore(profile);
+  if (evidence >= 58) return { high: 0, mid: 2, safer: 7 }[category] ?? 3;
+  if (evidence >= 36) return { high: 5, mid: 0, safer: 4 }[category] ?? 3;
+  return { high: 12, mid: 4, safer: 0 }[category] ?? 4;
 }
 
 function isStrongToeflScore(value) {
@@ -115,8 +122,7 @@ export function getRecommendedUniversities(profile, universities) {
   const strict = universities.filter(
     (university) =>
       regionMatches(answers, university) &&
-      majorMatchesUniversity(answers, university) &&
-      categoryMatches(answers.competitiveness, university),
+      majorMatchesUniversity(answers, university),
   );
 
   const regionalFallback = universities.filter((university) => regionMatches(answers, university));
@@ -132,7 +138,7 @@ export function getRecommendedUniversities(profile, universities) {
         (regionMatches(answers, university) ? 20 : 0) +
         examScore(answers, university) +
         achievementScore(answers) -
-        categoryWeight(answers.competitiveness, university.category) * 5,
+        categoryPenaltyFromProfile(answers, university.category),
     }))
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
     .slice(0, limit);

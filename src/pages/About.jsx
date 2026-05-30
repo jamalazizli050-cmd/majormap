@@ -8,7 +8,7 @@ function About() {
         <h1>Admissions planning without the noise.</h1>
         <p>
           UniSearch is a frontend MVP that helps high school students organize early university research by major, region,
-          exams, academic profile, and competitiveness preference.
+          exams, academic profile, and profile-based university fit.
         </p>
       </section>
 
@@ -24,7 +24,7 @@ function About() {
           <h2>The MVP</h2>
           <p>
             This version uses local data and deterministic matching to produce explainable recommendations, detail pages,
-            and comparison tables without a backend or AI integration.
+            comparison tables, and AI-supported fit summaries.
           </p>
         </article>
       </section>

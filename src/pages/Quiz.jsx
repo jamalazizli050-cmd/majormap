@@ -10,7 +10,6 @@ const majorOptions = ["Computer Science", "Artificial Intelligence", "Data Scien
 const regionOptions = ["United Kingdom", "United States", "Canada", "Europe", "Asia", "Turkey", "All regions"];
 const qualificationOptions = ["National diploma / Attestat", "IB", "A-levels", "AP-based profile", "Other"];
 const examOptions = ["IELTS", "TOEFL", "Duolingo", "SAT", "ACT", "AP", "IB", "A-levels", "National exam", "Other", "None yet"];
-const competitivenessOptions = ["Ambitious", "Balanced", "Safer / backup", "Mixed"];
 
 const initialProfile = {
   studentCountry: "",
@@ -32,7 +31,6 @@ const initialProfile = {
     Other: "",
   },
   achievements: "",
-  competitiveness: "",
 };
 
 function toggleExclusive(list, option, exclusiveOption) {
@@ -49,7 +47,7 @@ function Quiz() {
   const [otherCountry, setOtherCountry] = useState("");
   const [otherQualification, setOtherQualification] = useState("");
   const navigate = useNavigate();
-  const totalSteps = 8;
+  const totalSteps = 7;
 
   function update(field, value) {
     setProfile((current) => ({ ...current, [field]: value }));
@@ -69,8 +67,7 @@ function Quiz() {
     if (step === 3) return profile.qualification && (profile.qualification !== "Other" || otherQualification.trim()) && profile.grades.trim();
     if (step === 4) return profile.completedExams.length > 0;
     if (step === 5) return true;
-    if (step === 6) return true;
-    return Boolean(profile.competitiveness);
+    return true;
   }
 
   function finishProfile() {
@@ -81,6 +78,7 @@ function Quiz() {
       qualification: profile.qualification === "Other" ? otherQualification.trim() : profile.qualification,
       completedExams,
     };
+    delete finalProfile.competitiveness;
     saveStudentProfile(finalProfile);
     navigate("/results");
   }
@@ -211,16 +209,6 @@ function Quiz() {
               onChange={(event) => update("achievements", event.target.value)}
               placeholder="Example: Olympiad awards, coding projects, Telegram bot, research paper, student club, volunteering"
             />
-          </QuizStep>
-        )}
-
-        {step === 7 && (
-          <QuizStep title="What kind of university list do you want?">
-            <div className="quiz-options">
-              {competitivenessOptions.map((option) => (
-                <QuizOption key={option} label={option} selected={profile.competitiveness === option} onClick={() => update("competitiveness", option)} />
-              ))}
-            </div>
           </QuizStep>
         )}
 

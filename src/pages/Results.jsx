@@ -10,13 +10,15 @@ const categoryLabels = { high: "High / Reach", mid: "Mid / Target", safer: "Safe
 
 function Results() {
   const [, setVersion] = useState(0);
+  const [showAllUniversities, setShowAllUniversities] = useState(false);
   const profile = getStudentProfile();
   const recommendations = getRecommendedUniversities(profile, universities);
-  const grouped = groupByRegionAndCategory(recommendations);
+  const displayedUniversities = showAllUniversities ? universities : recommendations;
+  const grouped = groupByRegionAndCategory(displayedUniversities);
 
   useEffect(() => {
-    saveLastResults(recommendations.map((university) => university.id));
-  }, [recommendations]);
+    saveLastResults(displayedUniversities.map((university) => university.id));
+  }, [displayedUniversities]);
 
   return (
     <main>
@@ -24,8 +26,12 @@ function Results() {
         <span className="eyebrow">Recommended universities</span>
         <h1>Your UniSearch results</h1>
         {!profile && <p>No student profile found yet. You can explore a mixed list or start the profile quiz.</p>}
+        {profile && <p>Recommendations are ranked automatically from your grades, exams, achievements, target majors, and target regions.</p>}
         <div className="hero-actions">
           <Button to="/quiz" variant="secondary">Update profile</Button>
+          <Button onClick={() => setShowAllUniversities((value) => !value)} variant={showAllUniversities ? "primary" : "secondary"}>
+            {showAllUniversities ? "Show recommendations" : "View all universities"}
+          </Button>
         </div>
       </section>
 
@@ -46,8 +52,10 @@ function Results() {
       </section>
 
       <section className="page-section">
-        <SectionTitle title="University Suggestions">
-          Suggestions use the local university database only. Safer / Backup means a planning backup, never guaranteed admission.
+        <SectionTitle title={showAllUniversities ? "All Universities" : "University Suggestions"}>
+          {showAllUniversities
+            ? "Showing the full local university database. Use recommendations to return to the ranked shortlist."
+            : "Suggestions use the local university database and are ranked from the student's profile strength. Safer / Backup means a planning backup, never guaranteed admission."}
         </SectionTitle>
         {Object.entries(grouped).map(([region, categories]) => (
           <div className="region-group" key={region}>
@@ -98,7 +106,6 @@ function ProfileSummary({ profile }) {
     ["Grades", profile?.grades || "Not entered"],
     ["Completed exams and scores", scores],
     ["Achievements", profile?.achievements || "Not entered"],
-    ["Competitiveness preference", profile?.competitiveness || "Mixed"],
   ];
 
   return (
