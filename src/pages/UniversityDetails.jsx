@@ -1,9 +1,10 @@
-import { ExternalLink, Plus, X } from "lucide-react";
+import { ExternalLink, Plus, Sparkles, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Button from "../components/Button";
 import { universities } from "../data/universities";
 import { getBestProgramForMajor } from "../utils/matching";
+import { getAiSummaryCacheKey } from "../utils/aiSummary";
 import { addToCompare, getLastResults, getStudentProfile, isInCompare, removeFromCompare } from "../utils/storage";
 
 function DetailBlock({ title, children }) {
@@ -34,13 +35,8 @@ function UniversityDetails() {
   const profile = getStudentProfile();
   const lastResults = getLastResults();
   const { program, isExactMatch } = getBestProgramForMajor(university, profile);
-  const aiCacheKey = university && program ? `aiSummary_${university.id}_${program.programId}` : "";
-  const [aiState, setAiState] = useState(() => ({
-    loading: false,
-    error: "",
-    summary: aiCacheKey ? localStorage.getItem(aiCacheKey) || "" : "",
-    fromCache: Boolean(aiCacheKey && localStorage.getItem(aiCacheKey)),
-  }));
+  const aiCacheKey = getAiSummaryCacheKey(university, program);
+  const hasAiSummary = Boolean(aiCacheKey && localStorage.getItem(aiCacheKey));
 
   const nav = useMemo(() => {
     const index = lastResults.indexOf(id);
@@ -67,40 +63,6 @@ function UniversityDetails() {
     if (inCompare) removeFromCompare(university.id);
     else addToCompare(university.id);
     setVersion((value) => value + 1);
-  }
-
-  async function generateFitSummary({ force = false } = {}) {
-    if (!force && aiCacheKey) {
-      const cachedSummary = localStorage.getItem(aiCacheKey);
-      if (cachedSummary) {
-        setAiState({ loading: false, error: "", summary: cachedSummary, fromCache: true });
-        return;
-      }
-    }
-
-    setAiState({ loading: true, error: "", summary: "" });
-    try {
-      const response = await fetch("/api/ai-fit-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentProfile: profile, university, matchedProgram: program }),
-      });
-      const data = await readJsonResponse(response);
-      if (!response.ok) throw new Error(data.error || "AI request failed");
-      if (aiCacheKey) localStorage.setItem(aiCacheKey, data.summary);
-      setAiState({ loading: false, error: "", summary: data.summary, fromCache: false });
-    } catch (error) {
-      setAiState({ loading: false, error: error.message, summary: "", fromCache: false });
-    }
-  }
-
-  async function readJsonResponse(response) {
-    const contentType = response.headers.get("content-type") || "";
-    if (contentType.includes("application/json")) return response.json();
-
-    const body = await response.text();
-    const detail = body ? ` Server returned: ${body.slice(0, 120)}` : "";
-    throw new Error(`AI API did not return JSON. Check that /api/ai-fit-summary is deployed on Vercel.${detail}`);
   }
 
   return (
@@ -181,23 +143,15 @@ function UniversityDetails() {
         <aside className="detail-sidebar">
           <article className="ai-card">
             <h2>Personalized AI Fit Summary</h2>
-            <p>Generated only when you click. Cached summaries are shown immediately and do not call Gemini again.</p>
+            <p>Open a full AI report with fit analysis, cost signals, official links, and planning charts.</p>
             <div className="ai-actions">
-              {!aiState.summary && (
-                <Button onClick={() => generateFitSummary()} disabled={aiState.loading || !profile}>
-                  {aiState.loading ? "Generating..." : "Generate AI Fit Summary"}
-                </Button>
-              )}
-              {aiState.summary && (
-                <Button onClick={() => generateFitSummary({ force: true })} disabled={aiState.loading || !profile} variant="secondary">
-                  {aiState.loading ? "Regenerating..." : "Regenerate summary"}
-                </Button>
-              )}
+              <Button to={`/university/${university.id}/ai-summary`} disabled={!profile}>
+                <Sparkles size={16} />
+                {hasAiSummary ? "Open AI report" : "Create AI report"}
+              </Button>
             </div>
             {!profile && <div className="notice">Complete the student profile quiz before generating an AI fit summary.</div>}
-            {aiState.fromCache && <div className="notice">Loaded from local cache. Regenerate only if you want to spend another AI call.</div>}
-            {aiState.error && <div className="error-box">{aiState.error}</div>}
-            {aiState.summary && <div className="ai-output">{aiState.summary}</div>}
+            {hasAiSummary && <div className="notice">A cached AI report is ready. Opening it will not call Gemini again.</div>}
           </article>
           <article className="side-panel">
             <h2>Official links</h2>

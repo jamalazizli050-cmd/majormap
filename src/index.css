@@ -805,6 +805,197 @@ main {
   background: var(--orange-dark);
 }
 
+.ai-summary-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: end;
+  padding: 48px 0 30px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.ai-summary-hero h1 {
+  margin: 14px 0 10px;
+  font-size: clamp(2rem, 4vw, 4rem);
+  letter-spacing: 0;
+}
+
+.ai-summary-hero p {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.ai-model-pill,
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.back-link {
+  margin-right: 10px;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.ai-model-pill {
+  color: var(--orange-dark);
+  background: var(--orange-soft);
+  border: 1px solid var(--orange-border);
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.ai-hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ai-report-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: 20px;
+  align-items: start;
+  padding: 32px 0 48px;
+}
+
+.ai-report-main {
+  display: grid;
+  gap: 16px;
+}
+
+.ai-metric-grid,
+.ai-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ai-chart-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ai-metric-card,
+.ai-report-card,
+.ai-facts-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.ai-metric-card {
+  padding: 18px;
+}
+
+.ai-metric-card span,
+.fact-item span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.ai-metric-card strong {
+  display: block;
+  margin: 8px 0;
+  color: var(--text);
+  font-size: 1.28rem;
+  line-height: 1.25;
+}
+
+.ai-metric-card p,
+.fact-item p,
+.report-heading p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.ai-report-card,
+.ai-facts-panel {
+  padding: 22px;
+}
+
+.report-heading {
+  margin-bottom: 16px;
+}
+
+.report-heading h2,
+.ai-facts-panel h2 {
+  margin: 0 0 8px;
+}
+
+.empty-report {
+  padding: 20px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  border: 1px dashed var(--border-strong);
+  border-radius: 14px;
+  line-height: 1.6;
+}
+
+.ai-section-list {
+  display: grid;
+  gap: 14px;
+}
+
+.ai-summary-section {
+  padding: 18px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.ai-summary-section h3 {
+  margin: 0 0 10px;
+  color: var(--text);
+}
+
+.ai-summary-section p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.chart-center-value {
+  fill: var(--text);
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.ai-facts-panel {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 12px;
+}
+
+.ai-facts-panel a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  color: var(--primary);
+  font-weight: 800;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+}
+
+.fact-item {
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
 .insight-card {
   margin-bottom: 14px;
   padding: 22px;
@@ -1262,7 +1453,11 @@ main {
   .site-header,
   .hero-section,
   .two-column,
-  .detail-layout {
+  .detail-layout,
+  .ai-summary-hero,
+  .ai-report-layout,
+  .ai-metric-grid,
+  .ai-chart-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1299,6 +1494,14 @@ main {
     position: static;
     max-height: none;
     overflow: visible;
+  }
+
+  .ai-facts-panel {
+    position: static;
+  }
+
+  .ai-hero-actions {
+    justify-content: flex-start;
   }
 
   .compare-bar {
