@@ -32,6 +32,10 @@ export function getQuizAnswers() {
 }
 
 export function saveStudentProfile(profile) {
+  const previousProfile = getStudentProfile();
+  if (JSON.stringify(previousProfile || {}) !== JSON.stringify(profile || {})) {
+    clearAiSummaryCache();
+  }
   saveQuizAnswers(profile);
 }
 
@@ -80,4 +84,10 @@ export function clearCompareList() {
 
 export function isInCompare(universityId) {
   return getCompareList().includes(universityId);
+}
+
+export function clearAiSummaryCache() {
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith("aiSummary_"))
+    .forEach((key) => localStorage.removeItem(key));
 }

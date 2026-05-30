@@ -1,4 +1,4 @@
-import { ArrowLeft, ExternalLink, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, Cell, PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -13,7 +13,7 @@ function AiSummary() {
   const university = universities.find((item) => item.id === id);
   const profile = getStudentProfile();
   const { program } = university ? getBestProgramForMajor(university, profile) : { program: null };
-  const cacheKey = getAiSummaryCacheKey(university, program);
+  const cacheKey = getAiSummaryCacheKey(university, program, profile);
   const [state, setState] = useState(() => ({
     loading: false,
     error: "",
@@ -36,8 +36,8 @@ function AiSummary() {
     );
   }
 
-  async function generateSummary({ force = false } = {}) {
-    if (!force && cacheKey) {
+  async function generateSummary() {
+    if (cacheKey) {
       const cachedSummary = localStorage.getItem(cacheKey);
       if (cachedSummary) {
         setState({ loading: false, error: "", summary: cachedSummary, model: AI_MODEL_LABEL, fromCache: true });
@@ -45,7 +45,7 @@ function AiSummary() {
       }
     }
 
-    setState((current) => ({ ...current, loading: true, error: "", summary: force ? "" : current.summary }));
+    setState((current) => ({ ...current, loading: true, error: "" }));
     try {
       const data = await requestAiFitSummary({ profile, university, program });
       if (cacheKey) localStorage.setItem(cacheKey, data.summary);
@@ -68,22 +68,16 @@ function AiSummary() {
           <p>{program.programName} for a student from {profile?.studentCountry || "your profile"}.</p>
         </div>
         <div className="ai-hero-actions">
-          <Button onClick={() => generateSummary()} disabled={state.loading || !profile}>
-            {state.loading ? "Generating..." : state.summary ? "Use cached summary" : "Generate full AI summary"}
+          <Button onClick={() => generateSummary()} disabled={state.loading || !profile || Boolean(state.summary)}>
+            {state.loading ? "Generating..." : state.summary ? "Report generated" : "Generate full AI summary"}
           </Button>
-          {state.summary && (
-            <Button onClick={() => generateSummary({ force: true })} disabled={state.loading || !profile} variant="secondary">
-              <RefreshCw size={16} />
-              Regenerate
-            </Button>
-          )}
         </div>
       </section>
 
       <section className="ai-report-layout">
         <div className="ai-report-main">
           {!profile && <div className="notice">Complete the student profile quiz before generating an AI fit summary.</div>}
-          {state.fromCache && <div className="notice">Loaded from local cache. Regenerate if you want a fresh AI call.</div>}
+          {state.fromCache && <div className="notice">Loaded from local cache for this exact student profile.</div>}
           {state.error && <div className="error-box">{state.error}</div>}
 
           <div className="ai-metric-grid">

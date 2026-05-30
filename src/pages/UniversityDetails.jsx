@@ -35,7 +35,7 @@ function UniversityDetails() {
   const profile = getStudentProfile();
   const lastResults = getLastResults();
   const { program, isExactMatch } = getBestProgramForMajor(university, profile);
-  const aiCacheKey = getAiSummaryCacheKey(university, program);
+  const aiCacheKey = getAiSummaryCacheKey(university, program, profile);
   const hasAiSummary = Boolean(aiCacheKey && localStorage.getItem(aiCacheKey));
 
   const nav = useMemo(() => {

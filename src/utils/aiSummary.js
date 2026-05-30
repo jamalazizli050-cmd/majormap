@@ -1,7 +1,7 @@
 export const AI_MODEL_LABEL = "Gemini 3 Flash";
 
-export function getAiSummaryCacheKey(university, program) {
-  return university && program ? `aiSummary_${university.id}_${program.programId}` : "";
+export function getAiSummaryCacheKey(university, program, profile) {
+  return university && program ? `aiSummary_${university.id}_${program.programId}_${hashProfile(profile)}` : "";
 }
 
 export async function requestAiFitSummary({ profile, university, program }) {
@@ -88,4 +88,21 @@ async function readJsonResponse(response) {
   const body = await response.text();
   const detail = body ? ` Server returned: ${body.slice(0, 120)}` : "";
   throw new Error(`AI API did not return JSON. Check that /api/ai-fit-summary is deployed on Vercel.${detail}`);
+}
+
+function hashProfile(profile) {
+  const text = stableStringify(profile || {});
+  let hash = 5381;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = (hash * 33) ^ text.charCodeAt(index);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function stableStringify(value) {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) => `${key}:${stableStringify(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
 }
