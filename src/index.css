@@ -728,6 +728,18 @@ main {
 }
 
 .detail-hero {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.detail-hero > * {
+  width: min(100%, 960px);
+}
+
+.detail-hero h1 {
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
 }
 
@@ -745,7 +757,7 @@ main {
 
 .detail-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  grid-template-columns: minmax(0, 0.9fr) minmax(380px, 0.7fr);
   gap: 20px;
   align-items: start;
 }
@@ -787,13 +799,8 @@ main {
 }
 
 .detail-sidebar {
-  position: sticky;
-  top: 92px;
   display: grid;
   gap: 14px;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
-  padding-right: 2px;
 }
 
 .ai-card .button-primary {
@@ -1107,6 +1114,19 @@ main {
 
 .insight-card h2 {
   margin: 0 0 14px;
+}
+
+.compact-insight-card .ranking-grid,
+.compact-insight-card .score-grid-detail {
+  grid-template-columns: 1fr;
+}
+
+.compact-insight-card .score-grid-detail {
+  gap: 10px;
+}
+
+.compact-insight-card .score-item p {
+  font-size: 0.9rem;
 }
 
 .ranking-grid,

@@ -102,8 +102,20 @@ function UniversityDetails() {
           <DetailBlock title="Recommended exams">{program.recommendedExams}</DetailBlock>
           <DetailBlock title="Admission tests">{program.admissionTests}</DetailBlock>
           <DetailBlock title="Application notes">{program.applicationNotes}</DetailBlock>
-
-          <article className="insight-card">
+        </div>
+        <aside className="detail-sidebar">
+          <article className="ai-card">
+            <h2>Personalized AI Fit Summary</h2>
+            <p>Open a full AI report with fit analysis, cost signals, official links, and planning charts.</p>
+            <div className="ai-actions">
+              <Button to={`/university/${university.id}/ai-summary`} disabled={!profile}>
+                <Sparkles size={16} />
+                Open AI report
+              </Button>
+            </div>
+            {!profile && <div className="notice">Complete the student profile quiz before generating an AI fit summary.</div>}
+          </article>
+          <article className="insight-card compact-insight-card">
             <h2>University intelligence</h2>
             <div className="ranking-grid">
               <div>
@@ -116,9 +128,9 @@ function UniversityDetails() {
                 <p>{program.subjectRanking.note}</p>
               </div>
               <div>
-                <span>International tuition for matched program</span>
+                <span>International tuition</span>
                 <strong>{program.tuition.display}</strong>
-                <p>{program.tuition.year} - {program.tuition.precision}. {program.tuition.note}</p>
+                <p>{program.tuition.year} - {program.tuition.precision}</p>
                 <a href={program.tuition.sourceUrl} target="_blank" rel="noreferrer">Open fee source</a>
               </div>
             </div>
@@ -133,21 +145,6 @@ function UniversityDetails() {
             <div className="company-list">
               {university.insights.industry.ecosystemCompanies.map((company) => <span key={company}>{company}</span>)}
             </div>
-            <div className="notice">{university.insights.dataFreshness}</div>
-          </article>
-
-        </div>
-        <aside className="detail-sidebar">
-          <article className="ai-card">
-            <h2>Personalized AI Fit Summary</h2>
-            <p>Open a full AI report with fit analysis, cost signals, official links, and planning charts.</p>
-            <div className="ai-actions">
-              <Button to={`/university/${university.id}/ai-summary`} disabled={!profile}>
-                <Sparkles size={16} />
-                Open AI report
-              </Button>
-            </div>
-            {!profile && <div className="notice">Complete the student profile quiz before generating an AI fit summary.</div>}
           </article>
           <article className="side-panel">
             <h2>Official links</h2>
