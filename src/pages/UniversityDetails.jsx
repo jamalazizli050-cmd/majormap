@@ -7,15 +7,6 @@ import { universities } from "../data/universities";
 import { getBestProgramForMajor } from "../utils/matching";
 import { addToCompare, getLastResults, getStudentProfile, isInCompare, removeFromCompare } from "../utils/storage";
 
-function DetailBlock({ title, children }) {
-  return (
-    <article className="detail-block">
-      <h2>{title}</h2>
-      <p>{children}</p>
-    </article>
-  );
-}
-
 function ScoreItem({ label, value, note }) {
   return (
     <div className="score-item">
@@ -90,20 +81,81 @@ function UniversityDetails() {
       </section>
 
       <section className="page-section detail-layout">
-        <div className="program-guidance-grid">
-          <DetailBlock title="Overview">{university.overview}</DetailBlock>
-          <DetailBlock title="Matched program">{program.programName}</DetailBlock>
+        <article className="insight-card detail-intelligence-card">
+          <h2>University intelligence</h2>
+          <p className="intelligence-lede">{university.overview}</p>
           {!isExactMatch && (
-            <div className="notice guidance-notice">
+            <div className="notice">
               Program-specific data is limited for your selected major. This is general guidance. Always verify exact requirements on the official course page.
             </div>
           )}
-          <DetailBlock title="Academic requirements">{program.academicRequirements}</DetailBlock>
-          <DetailBlock title="English requirements">{program.englishRequirements}</DetailBlock>
-          <DetailBlock title="Recommended exams">{program.recommendedExams}</DetailBlock>
-          <DetailBlock title="Admission tests">{program.admissionTests}</DetailBlock>
-          <DetailBlock title="Application notes">{program.applicationNotes}</DetailBlock>
-        </div>
+          <div className="program-chip-row">
+            <span>Matched program</span>
+            <strong>{program.programName}</strong>
+          </div>
+          <div className="detail-chart-grid">
+            <div className="detail-chart-box">
+              <span>Admission realism</span>
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart
+                  innerRadius="68%"
+                  outerRadius="100%"
+                  data={[{ name: "Realism", value: university.insights.criteriaScores.acceptanceSelectivityTransparency * 10, fill: "#f97316" }]}
+                  startAngle={180}
+                  endAngle={-180}
+                >
+                  <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
+                  <RadialBar dataKey="value" cornerRadius={10} background />
+                  <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="detail-chart-value">
+                    {university.insights.criteriaScores.acceptanceSelectivityTransparency}/10
+                  </text>
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="detail-chart-box wide">
+              <span>Planning scores</span>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={getPlanningBars(university)} layout="vertical" margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" domain={[0, 10]} tick={{ fill: "#64748b", fontSize: 10 }} />
+                  <YAxis dataKey="name" type="category" width={72} tick={{ fill: "#334155", fontSize: 10 }} />
+                  <Tooltip />
+                  <Bar dataKey="score" radius={[0, 8, 8, 0]}>
+                    {getPlanningBars(university).map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="ranking-grid">
+            <div>
+              <span>Overall ranking signal</span>
+              <strong>{university.insights.rankings.overallBand}</strong>
+            </div>
+            <div>
+              <span>Faculty / subject ranking</span>
+              <strong>{program.subjectRanking.display}</strong>
+              <p>{program.subjectRanking.note}</p>
+            </div>
+            <div>
+              <span>International tuition</span>
+              <strong>{program.tuition.display}</strong>
+              <p>{program.tuition.year} - {program.tuition.precision}</p>
+              <a href={program.tuition.sourceUrl} target="_blank" rel="noreferrer">Open fee source</a>
+            </div>
+          </div>
+          <div className="score-grid-detail">
+            <ScoreItem label="City convenience" value={university.insights.criteriaScores.cityStudentConvenience} note={university.insights.city.note} />
+            <ScoreItem label="Tuition affordability" value={university.insights.criteriaScores.tuitionAffordability} note={university.insights.tuition.note} />
+            <ScoreItem label="Length clarity" value={university.insights.criteriaScores.programLengthClarity} note={university.insights.programLength.note} />
+            <ScoreItem label="Reviews / alumni outcomes" value={university.insights.criteriaScores.studentReviewsAndAlumniOutcomes} note={university.insights.reviewsAndAlumni.note} />
+            <ScoreItem label="Company ecosystem" value={university.insights.criteriaScores.industryLinks} note={university.insights.industry.note} />
+            <ScoreItem label="Acceptance transparency" value={university.insights.criteriaScores.acceptanceSelectivityTransparency} note={`${university.insights.acceptance.note} ${university.insights.acceptance.nameSpecificNote}`} />
+          </div>
+          <div className="company-list">
+            {university.insights.industry.ecosystemCompanies.map((company) => <span key={company}>{company}</span>)}
+          </div>
+        </article>
         <aside className="detail-sidebar">
           <article className="ai-card">
             <h2>Personalized AI Fit Summary</h2>
@@ -123,71 +175,6 @@ function UniversityDetails() {
             <Link to="/compare">Open comparison</Link>
           </article>
         </aside>
-        <article className="insight-card detail-intelligence-card">
-            <h2>University intelligence</h2>
-            <div className="detail-chart-grid">
-              <div className="detail-chart-box">
-                <span>Admission realism</span>
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadialBarChart
-                    innerRadius="68%"
-                    outerRadius="100%"
-                    data={[{ name: "Realism", value: university.insights.criteriaScores.acceptanceSelectivityTransparency * 10, fill: "#f97316" }]}
-                    startAngle={180}
-                    endAngle={-180}
-                  >
-                    <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-                    <RadialBar dataKey="value" cornerRadius={10} background />
-                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="detail-chart-value">
-                      {university.insights.criteriaScores.acceptanceSelectivityTransparency}/10
-                    </text>
-                  </RadialBarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="detail-chart-box wide">
-                <span>Planning scores</span>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={getPlanningBars(university)} layout="vertical" margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" domain={[0, 10]} tick={{ fill: "#64748b", fontSize: 10 }} />
-                    <YAxis dataKey="name" type="category" width={72} tick={{ fill: "#334155", fontSize: 10 }} />
-                    <Tooltip />
-                    <Bar dataKey="score" radius={[0, 8, 8, 0]}>
-                      {getPlanningBars(university).map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-            <div className="ranking-grid">
-              <div>
-                <span>Overall ranking signal</span>
-                <strong>{university.insights.rankings.overallBand}</strong>
-              </div>
-              <div>
-                <span>Faculty / subject ranking</span>
-                <strong>{program.subjectRanking.display}</strong>
-                <p>{program.subjectRanking.note}</p>
-              </div>
-              <div>
-                <span>International tuition</span>
-                <strong>{program.tuition.display}</strong>
-                <p>{program.tuition.year} - {program.tuition.precision}</p>
-                <a href={program.tuition.sourceUrl} target="_blank" rel="noreferrer">Open fee source</a>
-              </div>
-            </div>
-            <div className="score-grid-detail">
-              <ScoreItem label="City convenience" value={university.insights.criteriaScores.cityStudentConvenience} note={university.insights.city.note} />
-              <ScoreItem label="Tuition affordability" value={university.insights.criteriaScores.tuitionAffordability} note={university.insights.tuition.note} />
-              <ScoreItem label="Length clarity" value={university.insights.criteriaScores.programLengthClarity} note={university.insights.programLength.note} />
-              <ScoreItem label="Reviews / alumni outcomes" value={university.insights.criteriaScores.studentReviewsAndAlumniOutcomes} note={university.insights.reviewsAndAlumni.note} />
-              <ScoreItem label="Company ecosystem" value={university.insights.criteriaScores.industryLinks} note={university.insights.industry.note} />
-              <ScoreItem label="Acceptance transparency" value={university.insights.criteriaScores.acceptanceSelectivityTransparency} note={`${university.insights.acceptance.note} ${university.insights.acceptance.nameSpecificNote}`} />
-            </div>
-            <div className="company-list">
-              {university.insights.industry.ecosystemCompanies.map((company) => <span key={company}>{company}</span>)}
-            </div>
-        </article>
       </section>
     </main>
   );
