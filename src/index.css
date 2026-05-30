@@ -196,6 +196,7 @@ main {
 .hero-actions {
   gap: 12px;
   flex-wrap: wrap;
+  justify-content: center;
   margin-top: 30px;
 }
 
@@ -1127,6 +1128,36 @@ main {
 
 .compact-insight-card .score-item p {
   font-size: 0.9rem;
+}
+
+.detail-chart-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.detail-chart-box {
+  display: grid;
+  grid-template-rows: auto 160px;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.detail-chart-box span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.detail-chart-value {
+  fill: var(--text);
+  font-size: 1.35rem;
+  font-weight: 900;
 }
 
 .ranking-grid,

@@ -1,6 +1,7 @@
 import { ExternalLink, Plus, Sparkles, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { Bar, BarChart, CartesianGrid, Cell, PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import Button from "../components/Button";
 import { universities } from "../data/universities";
 import { getBestProgramForMajor } from "../utils/matching";
@@ -117,6 +118,40 @@ function UniversityDetails() {
           </article>
           <article className="insight-card compact-insight-card">
             <h2>University intelligence</h2>
+            <div className="detail-chart-grid">
+              <div className="detail-chart-box">
+                <span>Admission realism</span>
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadialBarChart
+                    innerRadius="68%"
+                    outerRadius="100%"
+                    data={[{ name: "Realism", value: university.insights.criteriaScores.acceptanceSelectivityTransparency * 10, fill: "#f97316" }]}
+                    startAngle={180}
+                    endAngle={-180}
+                  >
+                    <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
+                    <RadialBar dataKey="value" cornerRadius={10} background />
+                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="detail-chart-value">
+                      {university.insights.criteriaScores.acceptanceSelectivityTransparency}/10
+                    </text>
+                  </RadialBarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="detail-chart-box wide">
+                <span>Planning scores</span>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={getPlanningBars(university)} layout="vertical" margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" domain={[0, 10]} tick={{ fill: "#64748b", fontSize: 10 }} />
+                    <YAxis dataKey="name" type="category" width={72} tick={{ fill: "#334155", fontSize: 10 }} />
+                    <Tooltip />
+                    <Bar dataKey="score" radius={[0, 8, 8, 0]}>
+                      {getPlanningBars(university).map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
             <div className="ranking-grid">
               <div>
                 <span>Overall ranking signal</span>
@@ -156,6 +191,16 @@ function UniversityDetails() {
       </section>
     </main>
   );
+}
+
+function getPlanningBars(university) {
+  const scores = university.insights.criteriaScores;
+  return [
+    { name: "City", score: scores.cityStudentConvenience, color: "#2563eb" },
+    { name: "Cost", score: scores.tuitionAffordability, color: "#0f766e" },
+    { name: "Industry", score: scores.industryLinks, color: "#7c3aed" },
+    { name: "Realism", score: scores.acceptanceSelectivityTransparency, color: "#f97316" },
+  ];
 }
 
 export default UniversityDetails;
