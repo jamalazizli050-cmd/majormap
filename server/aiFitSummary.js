@@ -8,7 +8,12 @@ export async function createAiFitSummary({ studentProfile, university, matchedPr
   }
 
   if (!process.env.GEMINI_API_KEY) {
-    return { status: 500, body: { error: "Missing GEMINI_API_KEY environment variable." } };
+    return {
+      status: 500,
+      body: {
+        error: "AI summary is not configured on this deployment. Add GEMINI_API_KEY in Vercel Project Settings > Environment Variables, then redeploy.",
+      },
+    };
   }
 
   try {

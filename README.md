@@ -65,6 +65,14 @@ GEMINI_MODEL=gemini-3-flash-preview
 
 `.env` and `.env.local` are ignored by Git. Never put API keys in frontend code.
 
+For Vercel, add the same variables in:
+
+```text
+Project Settings -> Environment Variables
+```
+
+Add `GEMINI_API_KEY` for Production, Preview, and Development, then redeploy. Optional: add `GEMINI_MODEL=gemini-3-flash-preview`; otherwise the backend uses that model by default.
+
 ## Frontend Setup
 
 ```bash
