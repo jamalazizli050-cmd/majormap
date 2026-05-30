@@ -60,7 +60,7 @@ Create a local `.env` file in the project root:
 
 ```bash
 GEMINI_API_KEY=your_key_here
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-3-flash-preview
 ```
 
 `.env` and `.env.local` are ignored by Git. Never put API keys in frontend code.
@@ -117,7 +117,7 @@ Cost-safety behavior:
 - Generated summaries are cached in `localStorage` with `aiSummary_${university.id}_${matchedProgram.programId}`.
 - Cached summaries render immediately without another API call.
 - "Regenerate summary" manually bypasses the cache and overwrites it.
-- The backend uses `gemini-2.5-flash-lite` by default and rejects oversized request payloads.
+- The backend uses `gemini-3-flash-preview` by default and rejects oversized request payloads.
 
 ## University Intelligence Data
 

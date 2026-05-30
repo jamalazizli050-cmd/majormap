@@ -85,13 +85,22 @@ function UniversityDetails() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ studentProfile: profile, university, matchedProgram: program }),
       });
-      const data = await response.json();
+      const data = await readJsonResponse(response);
       if (!response.ok) throw new Error(data.error || "AI request failed");
       if (aiCacheKey) localStorage.setItem(aiCacheKey, data.summary);
       setAiState({ loading: false, error: "", summary: data.summary, fromCache: false });
     } catch (error) {
       setAiState({ loading: false, error: error.message, summary: "", fromCache: false });
     }
+  }
+
+  async function readJsonResponse(response) {
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) return response.json();
+
+    const body = await response.text();
+    const detail = body ? ` Server returned: ${body.slice(0, 120)}` : "";
+    throw new Error(`AI API did not return JSON. Check that /api/ai-fit-summary is deployed on Vercel.${detail}`);
   }
 
   return (
