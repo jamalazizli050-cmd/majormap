@@ -88,6 +88,6 @@ export function isInCompare(universityId) {
 
 export function clearAiSummaryCache() {
   Object.keys(localStorage)
-    .filter((key) => key.startsWith("aiSummary_"))
+    .filter((key) => key.startsWith("aiSummary"))
     .forEach((key) => localStorage.removeItem(key));
 }

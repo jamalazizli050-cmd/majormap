@@ -1,7 +1,7 @@
 export const AI_MODEL_LABEL = "Gemini 3 Flash";
 
 export function getAiSummaryCacheKey(university, program, profile) {
-  return university && program ? `aiSummary_${university.id}_${program.programId}_${hashProfile(profile)}` : "";
+  return university && program ? `aiSummaryV2_${university.id}_${program.programId}_${hashProfile(profile)}` : "";
 }
 
 export async function requestAiFitSummary({ profile, university, program }) {
@@ -26,6 +26,21 @@ export function cleanAiSummary(summary) {
     .trim();
 }
 
+export function readCachedAiReport(cacheKey) {
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (!cached) return null;
+    const parsed = JSON.parse(cached);
+    return typeof parsed === "string" ? { summary: parsed } : parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function writeCachedAiReport(cacheKey, report) {
+  localStorage.setItem(cacheKey, JSON.stringify(report));
+}
+
 export function splitAiSummary(summary) {
   const cleaned = cleanAiSummary(summary);
   const labels = [
@@ -47,38 +62,6 @@ export function splitAiSummary(summary) {
   });
 
   return sections.length ? sections : [{ title: "AI fit summary", body: cleaned }];
-}
-
-export function calculateFitEstimate({ profile, university, program }) {
-  if (!university) return { value: 0, label: "Needs preparation" };
-
-  const scores = university.insights.criteriaScores;
-  const selectivityScore = scores.acceptanceSelectivityTransparency;
-  const evidenceScore = getEvidenceScore(profile);
-  const categoryAdjustment = { high: -14, mid: -2, safer: 9 }[university.category] ?? 0;
-  const exactProgramBonus = program?.programId ? 4 : 0;
-  const interestBonus = profile?.regions?.includes(university.region) || profile?.regions?.includes("All regions") ? 4 : 0;
-  const raw = 38 + selectivityScore * 4 + evidenceScore + categoryAdjustment + exactProgramBonus + interestBonus;
-  const value = Math.max(18, Math.min(88, Math.round(raw)));
-
-  let label = "Reach option";
-  if (value >= 72) label = "Strong fit";
-  else if (value >= 55) label = "Moderate fit";
-  else if (value < 38) label = "Needs preparation";
-
-  return { value, label };
-}
-
-function getEvidenceScore(profile) {
-  if (!profile) return 0;
-  let score = 0;
-  if (profile.grades?.trim()) score += 7;
-  if (profile.achievements?.trim()) score += 6;
-  if (profile.completedExams?.length) score += Math.min(12, profile.completedExams.length * 4);
-  const scoreText = Object.values(profile.examScores || {}).join(" ").trim();
-  if (scoreText) score += 5;
-  if (profile.qualification) score += 4;
-  return score;
 }
 
 async function readJsonResponse(response) {
