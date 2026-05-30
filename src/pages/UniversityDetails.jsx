@@ -90,33 +90,8 @@ function UniversityDetails() {
       </section>
 
       <section className="page-section detail-layout">
-        <div>
-          <DetailBlock title="Overview">{university.overview}</DetailBlock>
-          <DetailBlock title="Matched program">{program.programName}</DetailBlock>
-          {!isExactMatch && (
-            <div className="notice">
-              Program-specific data is limited for your selected major. This is general guidance. Always verify exact requirements on the official course page.
-            </div>
-          )}
-          <DetailBlock title="Academic requirements">{program.academicRequirements}</DetailBlock>
-          <DetailBlock title="English requirements">{program.englishRequirements}</DetailBlock>
-          <DetailBlock title="Recommended exams">{program.recommendedExams}</DetailBlock>
-          <DetailBlock title="Admission tests">{program.admissionTests}</DetailBlock>
-          <DetailBlock title="Application notes">{program.applicationNotes}</DetailBlock>
-        </div>
-        <aside className="detail-sidebar">
-          <article className="ai-card">
-            <h2>Personalized AI Fit Summary</h2>
-            <p>Open a full AI report with fit analysis, cost signals, official links, and planning charts.</p>
-            <div className="ai-actions">
-              <Button to={`/university/${university.id}/ai-summary`} disabled={!profile}>
-                <Sparkles size={16} />
-                Open AI report
-              </Button>
-            </div>
-            {!profile && <div className="notice">Complete the student profile quiz before generating an AI fit summary.</div>}
-          </article>
-          <article className="insight-card compact-insight-card">
+        <div className="detail-main-panel">
+          <article className="insight-card">
             <h2>University intelligence</h2>
             <div className="detail-chart-grid">
               <div className="detail-chart-box">
@@ -181,6 +156,19 @@ function UniversityDetails() {
               {university.insights.industry.ecosystemCompanies.map((company) => <span key={company}>{company}</span>)}
             </div>
           </article>
+        </div>
+        <aside className="detail-sidebar">
+          <article className="ai-card">
+            <h2>Personalized AI Fit Summary</h2>
+            <p>Open a full AI report with fit analysis, cost signals, official links, and planning charts.</p>
+            <div className="ai-actions">
+              <Button to={`/university/${university.id}/ai-summary`} disabled={!profile}>
+                <Sparkles size={16} />
+                Open AI report
+              </Button>
+            </div>
+            {!profile && <div className="notice">Complete the student profile quiz before generating an AI fit summary.</div>}
+          </article>
           <article className="side-panel">
             <h2>Official links</h2>
             <a href={university.officialUrl} target="_blank" rel="noreferrer">University website</a>
@@ -188,6 +176,20 @@ function UniversityDetails() {
             <Link to="/compare">Open comparison</Link>
           </article>
         </aside>
+        <div className="program-guidance-grid">
+          <DetailBlock title="Overview">{university.overview}</DetailBlock>
+          <DetailBlock title="Matched program">{program.programName}</DetailBlock>
+          {!isExactMatch && (
+            <div className="notice guidance-notice">
+              Program-specific data is limited for your selected major. This is general guidance. Always verify exact requirements on the official course page.
+            </div>
+          )}
+          <DetailBlock title="Academic requirements">{program.academicRequirements}</DetailBlock>
+          <DetailBlock title="English requirements">{program.englishRequirements}</DetailBlock>
+          <DetailBlock title="Recommended exams">{program.recommendedExams}</DetailBlock>
+          <DetailBlock title="Admission tests">{program.admissionTests}</DetailBlock>
+          <DetailBlock title="Application notes">{program.applicationNotes}</DetailBlock>
+        </div>
       </section>
     </main>
   );
