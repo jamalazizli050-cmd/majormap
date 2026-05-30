@@ -758,13 +758,9 @@ main {
 
 .detail-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.48fr);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.45fr);
   gap: 20px;
   align-items: start;
-}
-
-.detail-main-panel {
-  min-width: 0;
 }
 
 .detail-block {
@@ -1121,9 +1117,22 @@ main {
   margin: 0 0 14px;
 }
 
+.detail-intelligence-card {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
+
+.detail-intelligence-card .ranking-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.detail-intelligence-card .score-grid-detail {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .detail-chart-grid {
   display: grid;
-  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
+  grid-template-columns: minmax(260px, 0.65fr) minmax(0, 1.35fr);
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -1152,7 +1161,6 @@ main {
 }
 
 .program-guidance-grid {
-  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
