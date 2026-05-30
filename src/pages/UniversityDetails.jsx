@@ -4,7 +4,6 @@ import { Link, useParams } from "react-router-dom";
 import Button from "../components/Button";
 import { universities } from "../data/universities";
 import { getBestProgramForMajor } from "../utils/matching";
-import { getAiSummaryCacheKey } from "../utils/aiSummary";
 import { addToCompare, getLastResults, getStudentProfile, isInCompare, removeFromCompare } from "../utils/storage";
 
 function DetailBlock({ title, children }) {
@@ -35,8 +34,6 @@ function UniversityDetails() {
   const profile = getStudentProfile();
   const lastResults = getLastResults();
   const { program, isExactMatch } = getBestProgramForMajor(university, profile);
-  const aiCacheKey = getAiSummaryCacheKey(university, program, profile);
-  const hasAiSummary = Boolean(aiCacheKey && localStorage.getItem(aiCacheKey));
 
   const nav = useMemo(() => {
     const index = lastResults.indexOf(id);
@@ -147,11 +144,10 @@ function UniversityDetails() {
             <div className="ai-actions">
               <Button to={`/university/${university.id}/ai-summary`} disabled={!profile}>
                 <Sparkles size={16} />
-                {hasAiSummary ? "Open AI report" : "Create AI report"}
+                Open AI report
               </Button>
             </div>
             {!profile && <div className="notice">Complete the student profile quiz before generating an AI fit summary.</div>}
-            {hasAiSummary && <div className="notice">A cached AI report is ready. Opening it will not call Gemini again.</div>}
           </article>
           <article className="side-panel">
             <h2>Official links</h2>
