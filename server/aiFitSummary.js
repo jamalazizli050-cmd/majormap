@@ -1,19 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
-const MAX_BODY_CHARS = 24000;
-const MAX_PROFILE_CHARS = 6000;
-const MAX_UNIVERSITY_CHARS = 9000;
-const MAX_PROGRAM_CHARS = 7000;
 
 export async function createAiFitSummary({ studentProfile, university, matchedProgram }) {
   if (!studentProfile || !university || !matchedProgram) {
     return { status: 400, body: { error: "Missing studentProfile, university, or matchedProgram." } };
-  }
-
-  const validationError = validateAiPayload({ studentProfile, university, matchedProgram });
-  if (validationError) {
-    return { status: 413, body: { error: validationError } };
   }
 
   if (!process.env.GEMINI_API_KEY) {
@@ -75,21 +66,4 @@ ${JSON.stringify(
 Matched program:
 ${JSON.stringify(matchedProgram, null, 2)}
 `;
-}
-
-function validateAiPayload({ studentProfile, university, matchedProgram }) {
-  const bodyLength = safeStringify({ studentProfile, university, matchedProgram }).length;
-  if (bodyLength > MAX_BODY_CHARS) return "AI summary request is too large. Please shorten the student profile before generating.";
-  if (safeStringify(studentProfile).length > MAX_PROFILE_CHARS) return "Student profile is too long for AI summary generation.";
-  if (safeStringify(university).length > MAX_UNIVERSITY_CHARS) return "University payload is too large for AI summary generation.";
-  if (safeStringify(matchedProgram).length > MAX_PROGRAM_CHARS) return "Matched program payload is too large for AI summary generation.";
-  return "";
-}
-
-function safeStringify(value) {
-  try {
-    return JSON.stringify(value || {});
-  } catch {
-    return "";
-  }
 }

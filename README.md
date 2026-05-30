@@ -117,7 +117,7 @@ Cost-safety behavior:
 - Generated summaries are cached in `localStorage` with `aiSummary_${university.id}_${matchedProgram.programId}`.
 - Cached summaries render immediately without another API call.
 - "Regenerate summary" manually bypasses the cache and overwrites it.
-- The backend uses `gemini-3-flash-preview` by default and rejects oversized request payloads.
+- The backend uses `gemini-3-flash-preview` by default.
 
 ## University Intelligence Data
 

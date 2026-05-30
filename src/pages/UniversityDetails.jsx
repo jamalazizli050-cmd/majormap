@@ -177,6 +177,8 @@ function UniversityDetails() {
             <div className="notice">{university.insights.dataFreshness}</div>
           </article>
 
+        </div>
+        <aside className="detail-sidebar">
           <article className="ai-card">
             <h2>Personalized AI Fit Summary</h2>
             <p>Generated only when you click. Cached summaries are shown immediately and do not call Gemini again.</p>
@@ -197,12 +199,12 @@ function UniversityDetails() {
             {aiState.error && <div className="error-box">{aiState.error}</div>}
             {aiState.summary && <div className="ai-output">{aiState.summary}</div>}
           </article>
-        </div>
-        <aside className="side-panel">
-          <h2>Official links</h2>
-          <a href={university.officialUrl} target="_blank" rel="noreferrer">University website</a>
-          <a href={program.programUrl} target="_blank" rel="noreferrer">Program/admissions page</a>
-          <Link to="/compare">Open comparison</Link>
+          <article className="side-panel">
+            <h2>Official links</h2>
+            <a href={university.officialUrl} target="_blank" rel="noreferrer">University website</a>
+            <a href={program.programUrl} target="_blank" rel="noreferrer">Program/admissions page</a>
+            <Link to="/compare">Open comparison</Link>
+          </article>
         </aside>
       </section>
     </main>

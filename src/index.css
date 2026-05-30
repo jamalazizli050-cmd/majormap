@@ -745,7 +745,7 @@ main {
 
 .detail-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
   gap: 20px;
   align-items: start;
 }
@@ -784,6 +784,16 @@ main {
   border-radius: 16px;
   box-shadow: var(--shadow);
   border-color: var(--orange-border);
+}
+
+.detail-sidebar {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 14px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .ai-card .button-primary {
@@ -1091,8 +1101,6 @@ main {
 }
 
 .side-panel {
-  position: sticky;
-  top: 92px;
   display: grid;
   gap: 12px;
 }
@@ -1285,6 +1293,12 @@ main {
 
   .side-panel {
     position: static;
+  }
+
+  .detail-sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 
   .compare-bar {

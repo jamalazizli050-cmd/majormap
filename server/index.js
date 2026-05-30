@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 5050;
 const app = express();
 
 app.use(cors({ origin: ["http://127.0.0.1:5173", "http://localhost:5173"] }));
-app.use(express.json({ limit: "80kb" }));
+app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (_request, response) => {
   response.json({ ok: true });
