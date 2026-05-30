@@ -1,5 +1,5 @@
 import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, Cell, PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import Button from "../components/Button";
@@ -16,7 +16,7 @@ function AiSummary() {
   const cacheKey = getAiSummaryCacheKey(university, program, profile);
   const cachedReport = cacheKey ? readCachedAiReport(cacheKey) : null;
   const [state, setState] = useState(() => ({
-    loading: false,
+    loading: Boolean(profile && !cachedReport && university && program),
     error: "",
     summary: cachedReport?.summary || "",
     model: cachedReport?.model || AI_MODEL_LABEL,
@@ -29,6 +29,35 @@ function AiSummary() {
 
   const summarySections = useMemo(() => splitAiSummary(state.summary), [state.summary]);
 
+  useEffect(() => {
+    if (!profile || !university || !program || state.summary || state.error) return;
+    let cancelled = false;
+
+    async function loadSummary() {
+      if (cacheKey) {
+        const cached = readCachedAiReport(cacheKey);
+        if (cached) {
+          if (!cancelled) setState(getReportState(cached, true));
+          return;
+        }
+      }
+
+      setState((current) => ({ ...current, loading: true, error: "" }));
+      try {
+        const data = await requestAiFitSummary({ profile, university, program });
+        if (cacheKey) writeCachedAiReport(cacheKey, data);
+        if (!cancelled) setState(getReportState(data, false));
+      } catch (error) {
+        if (!cancelled) setState((current) => ({ ...current, loading: false, error: error.message, fromCache: false }));
+      }
+    }
+
+    loadSummary();
+    return () => {
+      cancelled = true;
+    };
+  }, [cacheKey, profile, program, state.error, state.summary, university]);
+
   if (!university) {
     return (
       <main className="narrow-page">
@@ -38,45 +67,6 @@ function AiSummary() {
         </section>
       </main>
     );
-  }
-
-  async function generateSummary() {
-    if (cacheKey) {
-      const cached = readCachedAiReport(cacheKey);
-      if (cached) {
-        setState({
-          loading: false,
-          error: "",
-          summary: cached.summary || "",
-          model: cached.model || AI_MODEL_LABEL,
-          fitEstimatePercent: cached.fitEstimatePercent || null,
-          fitEstimateLabel: cached.fitEstimateLabel || "",
-          fitEstimateReason: cached.fitEstimateReason || "",
-          acceptanceBaselinePercent: cached.acceptanceBaselinePercent || null,
-          fromCache: true,
-        });
-        return;
-      }
-    }
-
-    setState((current) => ({ ...current, loading: true, error: "" }));
-    try {
-      const data = await requestAiFitSummary({ profile, university, program });
-      if (cacheKey) writeCachedAiReport(cacheKey, data);
-      setState({
-        loading: false,
-        error: "",
-        summary: data.summary,
-        model: data.model || AI_MODEL_LABEL,
-        fitEstimatePercent: data.fitEstimatePercent || null,
-        fitEstimateLabel: data.fitEstimateLabel || "",
-        fitEstimateReason: data.fitEstimateReason || "",
-        acceptanceBaselinePercent: data.acceptanceBaselinePercent || null,
-        fromCache: false,
-      });
-    } catch (error) {
-      setState((current) => ({ ...current, loading: false, error: error.message, fromCache: false }));
-    }
   }
 
   return (
@@ -91,10 +81,9 @@ function AiSummary() {
           <h1>{university.name} AI Fit Summary</h1>
           <p>{program.programName} for a student from {profile?.studentCountry || "your profile"}.</p>
         </div>
-        <div className="ai-hero-actions">
-          <Button onClick={() => generateSummary()} disabled={state.loading || !profile || Boolean(state.summary)}>
-            {state.loading ? "Generating..." : state.summary ? "Report generated" : "Generate full AI summary"}
-          </Button>
+        <div className="ai-hero-status">
+          {state.loading && <span className="ai-loading-pill"><span /> Building AI report</span>}
+          {state.summary && <span className="ai-ready-pill">Report ready</span>}
         </div>
       </section>
 
@@ -107,7 +96,7 @@ function AiSummary() {
           <div className="ai-metric-grid">
             <Metric
               label="AI fit estimate"
-              value={state.fitEstimatePercent ? `${state.fitEstimatePercent}%` : "Generate report"}
+              value={state.fitEstimatePercent ? `${state.fitEstimatePercent}%` : "Waiting for AI"}
               note={state.fitEstimatePercent ? `${state.fitEstimateLabel}. ${state.fitEstimateReason || "AI estimate, not an admission guarantee."}` : "Gemini estimates this after reading your profile and the university selectivity baseline."}
             />
             <Metric
@@ -163,8 +152,8 @@ function AiSummary() {
               <h2>AI counselor report</h2>
               <p>Based on your saved student profile, matched program data, and university facts in UniSearch.</p>
             </div>
-            {!state.summary && !state.loading && <div className="empty-report">Generate the report to see a full, human-readable fit summary here.</div>}
-            {state.loading && <div className="empty-report">Building your report...</div>}
+            {!state.summary && !state.loading && <div className="empty-report">The AI report will appear here when the request finishes.</div>}
+            {state.loading && <AiReportLoading />}
             {state.summary && (
               <div className="ai-section-list">
                 {summarySections.map((section) => (
@@ -193,6 +182,34 @@ function AiSummary() {
         </aside>
       </section>
     </main>
+  );
+}
+
+function getReportState(data, fromCache) {
+  return {
+    loading: false,
+    error: "",
+    summary: data.summary || "",
+    model: data.model || AI_MODEL_LABEL,
+    fitEstimatePercent: data.fitEstimatePercent || null,
+    fitEstimateLabel: data.fitEstimateLabel || "",
+    fitEstimateReason: data.fitEstimateReason || "",
+    acceptanceBaselinePercent: data.acceptanceBaselinePercent || null,
+    fromCache,
+  };
+}
+
+function AiReportLoading() {
+  return (
+    <div className="ai-report-loading">
+      <div className="ai-loader-orbit">
+        <span />
+      </div>
+      <div>
+        <strong>Building your AI counselor report</strong>
+        <p>Gemini is reading your student profile, university facts, tuition data, and selectivity baseline.</p>
+      </div>
+    </div>
   );
 }
 
